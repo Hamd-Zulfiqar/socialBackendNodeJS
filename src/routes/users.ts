@@ -1,9 +1,9 @@
-const express = require("express");
-const jwt = require("jsonwebtoken");
+let jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const router = express.Router();
+import { Router } from "express";
 const User = require("../models/user");
 const authentication = require("./middleware/authentication");
+const router = Router();
 
 //Get all users
 router.get("/", async (req, res) => {
@@ -48,7 +48,7 @@ router.post("/login", async (req, res) => {
     const loggedInUser = await user.save();
     res.json({
       ...loggedInUser.toObject(),
-      token: getToken(),
+      token: getToken(loggedInUser.email, loggedInUser.id),
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
