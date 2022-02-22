@@ -3,14 +3,14 @@ const bcrypt = require("bcrypt");
 import { Router, Request, Response, NextFunction } from "express";
 import { ObjectId } from "mongoose";
 const User = require("../models/user");
+import { UserInterface } from "../interfaces/User";
 const authentication = require("./middleware/authentication");
-const ObjectID = require("mongodb").ObjectID;
 const router = Router();
 
 //Get all users
 router.get("/", async (req, res) => {
   try {
-    const users = await User.find();
+    const users: UserInterface[] = await User.find();
     res.json(users);
   } catch (error: any) {
     res.status(500).json({ message: error.message });

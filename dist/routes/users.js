@@ -5,7 +5,6 @@ const bcrypt = require("bcrypt");
 const express_1 = require("express");
 const User = require("../models/user");
 const authentication = require("./middleware/authentication");
-const ObjectID = require("mongodb").ObjectID;
 const router = (0, express_1.Router)();
 //Get all users
 router.get("/", async (req, res) => {

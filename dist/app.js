@@ -22,11 +22,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv").config();
 // const express = require("express");
 const express = __importStar(require("express"));
+const morgan = __importStar(require("morgan"));
 const app = express.default();
 const mongoose = require("mongoose");
 const server = require("http").createServer(app);
 const io = require("socket.io")(server);
 app.use(express.json());
+app.use(morgan.default("tiny"));
 server.listen(3000, () => {
     console.log("server started....");
 });

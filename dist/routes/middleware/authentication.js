@@ -21,15 +21,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 // const jwt = require("jsonwebtoken");
 const jwt = __importStar(require("jsonwebtoken"));
-// Put it in env
-const secretKey = "socialSecretKey";
 module.exports = (req, res, next) => {
     var _a;
     try {
         const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
         if (!token)
             return res.status(401).json({ message: "Authentication Failed" });
-        res.decodedData = jwt.verify(token, secretKey);
+        res.decodedData = jwt.verify(token, process.env.JWT_TOKEN_SECRET);
         next();
     }
     catch (error) {

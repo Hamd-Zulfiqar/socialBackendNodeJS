@@ -2,17 +2,14 @@
 import * as jwt from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
-// Put it in env
-const secretKey = "socialSecretKey";
-
 module.exports = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token: string | undefined = req.headers.authorization?.split(" ")[1];
     if (!token)
       return res.status(401).json({ message: "Authentication Failed" });
-    res.decodedData = jwt.verify(token, secretKey);
+    res.decodedData = jwt.verify(token, process.env.JWT_TOKEN_SECRET!);
     next();
-  } catch (error) {
+  } catch (error: any) {
     return res.status(401).json({ message: "Authentication Failed" });
   }
 };
