@@ -38,4 +38,4 @@ const userSchema = new Schema<UserInterface & Document>({
   },
 });
 
-module.exports = model("User", userSchema);
+module.exports = model<UserInterface & Document>("User", userSchema);

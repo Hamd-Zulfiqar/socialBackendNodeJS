@@ -20,10 +20,12 @@ router.get("/", async (req, res) => {
 //Create user
 router.post("/signup", async (req, res) => {
   try {
-    const existingUser = await User.findOne({ email: req.body.email });
+    const existingUser: UserInterface = await User.findOne({
+      email: req.body.email as string,
+    });
     if (existingUser != null)
       return res.status(400).json({ message: "User already exists" });
-    const hash = await bcrypt.hash(req.body.password, 10);
+    const hash: string = await bcrypt.hash(req.body.password, 10);
     const user = new User({
       name: req.body.name,
       email: req.body.email,
@@ -31,7 +33,7 @@ router.post("/signup", async (req, res) => {
       DOB: req.body.DOB,
       gender: req.body.gender,
     });
-    const newUser = await user.save();
+    const newUser: UserInterface = await user.save();
     res.json(newUser);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
@@ -44,7 +46,10 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     if (user == null)
       return res.status(401).json({ message: "Invalid credentials" });
-    const result = await bcrypt.compare(req.body.password, user.password);
+    const result: boolean = await bcrypt.compare(
+      req.body.password,
+      user.password
+    );
     if (!result)
       return res.status(401).json({ message: "Invalid credentials" });
     const loggedInUser = await user.save();
