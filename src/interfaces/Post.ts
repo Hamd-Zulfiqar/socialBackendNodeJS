@@ -1,4 +1,4 @@
-export interface Post {
+export interface PostInterface {
   userID: String;
   caption: String;
   image: Buffer;

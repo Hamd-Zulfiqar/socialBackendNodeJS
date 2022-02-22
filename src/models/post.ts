@@ -1,7 +1,7 @@
 import { Schema, model, Document } from "mongoose";
-import { Post } from "../interfaces/Post";
+import { PostInterface } from "../interfaces/Post";
 
-const postSchema = new Schema<Post & Document>({
+const postSchema = new Schema<PostInterface & Document>({
   userID: {
     type: String,
     required: true,

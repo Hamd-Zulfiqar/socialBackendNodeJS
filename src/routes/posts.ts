@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
+import { PostInterface } from "../interfaces/Post";
 const Post = require("../models/post");
 const User = require("../models/user");
 const authentication = require("./middleware/authentication");
@@ -7,7 +8,7 @@ const router = Router();
 //Get all posts
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const posts = await Post.find();
+    const posts: PostInterface[] = await Post.find();
     res.json(posts);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
