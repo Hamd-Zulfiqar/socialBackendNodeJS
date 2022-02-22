@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "devStart": "nodemon dist/app.js"
   },
-  "author": "Umer Saleem",
+  "author": "Hamd Zulfiqar",
   "license": "ISC",
   "dependencies": {
     "@types/bcrypt": "^5.0.0",
