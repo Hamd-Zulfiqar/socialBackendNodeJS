@@ -1,8 +1,10 @@
 let jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-import { Router } from "express";
+import { Router, Request, Response, NextFunction } from "express";
+import { ObjectId } from "mongoose";
 const User = require("../models/user");
 const authentication = require("./middleware/authentication");
+const ObjectID = require("mongodb").ObjectID;
 const router = Router();
 
 //Get all users
@@ -10,7 +12,7 @@ router.get("/", async (req, res) => {
   try {
     const users = await User.find();
     res.json(users);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 });
@@ -31,7 +33,7 @@ router.post("/signup", async (req, res) => {
     });
     const newUser = await user.save();
     res.json(newUser);
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 });
@@ -50,7 +52,7 @@ router.post("/login", async (req, res) => {
       ...loggedInUser.toObject(),
       token: getToken(loggedInUser.email, loggedInUser.id),
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 });
@@ -65,7 +67,7 @@ router.get("/delete/:id", authentication, getUser, async (req, res) => {
   try {
     await res.user.remove();
     res.json({ message: "User deleted" });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 });
@@ -82,7 +84,7 @@ router.post("/update/:id", authentication, getUser, async (req, res) => {
   try {
     const updatedUser = await res.user.save();
     res.json(updatedUser);
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 });
@@ -100,7 +102,7 @@ router.post("/follow", authentication, async (req, res) => {
       return res.status(400).json({ message: "Already a follower" });
     user.followingList.push(req.body.followerID);
     res.json(await user.save());
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }
 });
@@ -112,30 +114,30 @@ router.post("/unfollow", authentication, async (req, res) => {
     if (user === null)
       return res.status(404).json({ message: "Cannot find user" });
     const followingList = user.followingList.filter(
-      (id) => id !== req.body.followerID
+      (id: ObjectId) => id !== req.body.followerID
     );
     user.followingList = followingList;
     res.json(await user.save());
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }
 });
 
 //Middleware to get the user from ID
-async function getUser(req, res, next) {
+async function getUser(req: Request, res: Response, next: NextFunction) {
   let user;
   try {
     user = await User.findById(req.params.id);
     if (user === null)
       return res.status(404).json({ message: "Cannot find user" });
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }
   res.user = user;
   next();
 }
 
-function getToken(email, id) {
+function getToken(email: string, id: string) {
   const token = jwt.sign({ email, id }, process.env.JWT_TOKEN_SECRET, {
     expiresIn: "2d",
   });

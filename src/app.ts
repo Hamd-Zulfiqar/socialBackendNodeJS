@@ -17,7 +17,7 @@ app.set("view engine", "ejs");
 app.set("socketIO", io);
 
 //Setting up feed write just to see live events log
-app.get("/feed", (req: express.Request, res: express.Response) => {
+app.get("/feed", (req, res) => {
   res.render("feed");
 });
 
@@ -29,7 +29,7 @@ app.use("/users", usersRoutes);
 const postsRoutes = require("./routes/posts");
 app.use("/posts", postsRoutes);
 
-mongoose.connect(process.env.DB_URL, {
+mongoose.connect(process.env.DB_URL!, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });

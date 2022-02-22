@@ -5,7 +5,9 @@ const bcrypt = require("bcrypt");
 const express_1 = require("express");
 const User = require("../models/user");
 const authentication = require("./middleware/authentication");
+const ObjectID = require("mongodb").ObjectID;
 const router = (0, express_1.Router)();
+//Get all users
 router.get("/", async (req, res) => {
     try {
         const users = await User.find();
@@ -15,6 +17,7 @@ router.get("/", async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+//Create user
 router.post("/signup", async (req, res) => {
     try {
         const existingUser = await User.findOne({ email: req.body.email });
@@ -35,6 +38,7 @@ router.post("/signup", async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+//Get User
 router.post("/login", async (req, res) => {
     try {
         const user = await User.findOne({ email: req.body.email });
@@ -50,9 +54,11 @@ router.post("/login", async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+//Get User
 router.get("/:id", authentication, getUser, (req, res) => {
     res.json(res.user);
 });
+//Delete User
 router.get("/delete/:id", authentication, getUser, async (req, res) => {
     try {
         await res.user.remove();
@@ -62,6 +68,7 @@ router.get("/delete/:id", authentication, getUser, async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+//Update User
 router.post("/update/:id", authentication, getUser, async (req, res) => {
     if (req.body.name != null) {
         res.user.name = req.body.name;
@@ -78,6 +85,7 @@ router.post("/update/:id", authentication, getUser, async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+//Follow User
 router.post("/follow", authentication, async (req, res) => {
     try {
         const user = await User.findById(req.body.userID);
@@ -93,6 +101,7 @@ router.post("/follow", authentication, async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 });
+//Unfollow User
 router.post("/unfollow", authentication, async (req, res) => {
     try {
         const user = await User.findById(req.body.userID);
@@ -106,6 +115,7 @@ router.post("/unfollow", authentication, async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 });
+//Middleware to get the user from ID
 async function getUser(req, res, next) {
     let user;
     try {
@@ -126,4 +136,3 @@ function getToken(email, id) {
     return token;
 }
 module.exports = router;
-//# sourceMappingURL=users.js.map

@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 const Post = require("../models/post");
 const User = require("../models/user");
 const authentication = require("./middleware/authentication");
@@ -9,7 +9,7 @@ router.get("/", async (req: Request, res: Response) => {
   try {
     const posts = await Post.find();
     res.json(posts);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 });
@@ -19,7 +19,7 @@ router.get("/user", authentication, async (req, res) => {
   try {
     const posts = await Post.find({ userID: req.query.id });
     res.json(posts);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 });
@@ -38,9 +38,11 @@ router.get("/feed", authentication, async (req: Request, res: Response) => {
       .skip(((page as number) - 1) * limit)
       .limit(limit);
     if (req.query.filter)
-      posts = posts.filter((post) => post.caption.includes(req.query.filter));
+      posts = posts.filter((post: any) =>
+        post.caption.includes(req.query.filter)
+      );
     res.json(posts);
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 });
@@ -59,7 +61,7 @@ router.post("/create", authentication, async (req, res) => {
     const io = req.app.get("socketIO");
     io.emit("postAdded", newPost.toObject());
     res.json(newPost);
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 });
@@ -74,7 +76,7 @@ router.get("/delete/:id", authentication, getPost, async (req, res) => {
   try {
     await res.post.remove();
     res.json({ message: "Post deleted" });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
 });
@@ -88,20 +90,20 @@ router.post("/update/:id", authentication, getPost, async (req, res) => {
   try {
     const updatedPost = await res.post.save();
     res.json(updatedPost);
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 });
 
 //Middleware to get the post from ID
-async function getPost(req, res, next) {
+async function getPost(req: Request, res: Response, next: NextFunction) {
   let post;
   try {
     post = await Post.findById(req.params.id);
     if (post === null) {
       return res.status(404).json({ message: "Cannot find post" });
     }
-  } catch (error) {
+  } catch (error: any) {
     return res.status(500).json({ message: error.message });
   }
   res.post = post;

@@ -19,7 +19,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+// const jwt = require("jsonwebtoken");
 const jwt = __importStar(require("jsonwebtoken"));
+// Put it in env
 const secretKey = "socialSecretKey";
 module.exports = (req, res, next) => {
     var _a;
@@ -34,4 +36,3 @@ module.exports = (req, res, next) => {
         return res.status(401).json({ message: "Authentication Failed" });
     }
 };
-//# sourceMappingURL=authentication.js.map

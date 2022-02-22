@@ -1,2 +1,4 @@
 "use strict";
-//# sourceMappingURL=createToken.js.map
+// const jwt = require('jsonwebtoken');
+// module.exports = (req, res, next) => {
+// }

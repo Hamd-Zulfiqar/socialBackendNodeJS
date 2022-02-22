@@ -5,6 +5,7 @@ const Post = require("../models/post");
 const User = require("../models/user");
 const authentication = require("./middleware/authentication");
 const router = (0, express_1.Router)();
+//Get all posts
 router.get("/", async (req, res) => {
     try {
         const posts = await Post.find();
@@ -14,6 +15,7 @@ router.get("/", async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+//Get all posts for a user
 router.get("/user", authentication, async (req, res) => {
     try {
         const posts = await Post.find({ userID: req.query.id });
@@ -23,6 +25,7 @@ router.get("/user", authentication, async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+//Get feed for a user
 router.get("/feed", authentication, async (req, res) => {
     const { page = 1 } = req.query;
     const limit = 3;
@@ -43,6 +46,7 @@ router.get("/feed", authentication, async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+//Create post
 router.post("/create", authentication, async (req, res) => {
     const post = new Post({
         userID: req.body.userID,
@@ -61,9 +65,11 @@ router.post("/create", authentication, async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+//Get post
 router.get("/:id", authentication, getPost, (req, res) => {
     res.json(res.post);
 });
+//Delete post
 router.get("/delete/:id", authentication, getPost, async (req, res) => {
     try {
         await res.post.remove();
@@ -73,6 +79,7 @@ router.get("/delete/:id", authentication, getPost, async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 });
+//Update Post
 router.post("/update/:id", authentication, getPost, async (req, res) => {
     if (req.body.caption != null) {
         res.post.caption = req.body.caption;
@@ -86,6 +93,7 @@ router.post("/update/:id", authentication, getPost, async (req, res) => {
         res.status(400).json({ message: error.message });
     }
 });
+//Middleware to get the post from ID
 async function getPost(req, res, next) {
     let post;
     try {
@@ -101,4 +109,3 @@ async function getPost(req, res, next) {
     next();
 }
 module.exports = router;
-//# sourceMappingURL=posts.js.map
