@@ -1,5 +1,7 @@
-const mongoose = require("mongoose");
-const postSchema = new mongoose.Schema({
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const mongoose_1 = require("mongoose");
+const postSchema = new mongoose_1.Schema({
     userID: {
         type: String,
         required: true,
@@ -22,4 +24,4 @@ const postSchema = new mongoose.Schema({
         required: false,
     },
 });
-module.exports = mongoose.model("Post", postSchema);
+module.exports = (0, mongoose_1.model)("Post", postSchema);
