@@ -1,8 +1,8 @@
 // const mongoose = require("mongoose");
-import { Schema, model, Document } from "mongoose";
-import { UserInterface } from "../interfaces/User";
+import { Schema, model } from "mongoose";
+import { UserDocument } from "../interfaces/User";
 
-const userSchema = new Schema<UserInterface & Document>({
+const userSchema = new Schema<UserDocument>({
   name: {
     type: String,
     required: true,
@@ -38,4 +38,4 @@ const userSchema = new Schema<UserInterface & Document>({
   },
 });
 
-module.exports = model<UserInterface & Document>("User", userSchema);
+module.exports = model<UserDocument>("User", userSchema);

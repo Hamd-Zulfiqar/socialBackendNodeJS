@@ -1,16 +1,24 @@
 let jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
+// const bcrypt = require("bcrypt");
+import bcrypt from "bcrypt";
 import { Router, Request, Response, NextFunction } from "express";
 import { ObjectId } from "mongoose";
+import { UserResponse, AuthResponse } from "../interfaces/Response";
 const User = require("../models/user");
-import { UserInterface } from "../interfaces/User";
+import { UserDocument, UserInterface } from "../interfaces/User";
 const authentication = require("./middleware/authentication");
+
 const router = Router();
 
+interface SignUp {
+  name: string;
+  email: string;
+}
+
 //Get all users
-router.get("/", async (req, res) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
-    const users: UserInterface[] = await User.find();
+    const users: UserDocument[] = await User.find();
     res.json(users);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -18,32 +26,33 @@ router.get("/", async (req, res) => {
 });
 
 //Create user
-router.post("/signup", async (req, res) => {
+router.post("/signup", async (req: Request, res: Response) => {
   try {
-    const existingUser: UserInterface = await User.findOne({
-      email: req.body.email as string,
+    const payload: UserInterface = req.body;
+    const existingUser: UserDocument = await User.findOne({
+      email: payload.email,
     });
     if (existingUser != null)
       return res.status(400).json({ message: "User already exists" });
-    const hash: string = await bcrypt.hash(req.body.password, 10);
-    const user = new User({
-      name: req.body.name,
-      email: req.body.email,
+    const hash: string = await bcrypt.hash(payload.password, 10);
+    const user: UserDocument = new User({
+      name: payload.name,
+      email: payload.email,
       password: hash,
-      DOB: req.body.DOB,
-      gender: req.body.gender,
+      DOB: payload.DOB,
+      gender: payload.gender,
     });
-    const newUser: UserInterface = await user.save();
-    res.json(newUser);
+    const newUser: UserDocument = await user.save();
+    res.json(newUser.toObject());
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
 });
 
 //Get User
-router.post("/login", async (req, res) => {
+router.post("/login", async (req: Request, res: Response) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user: UserDocument = await User.findOne({ email: req.body.email });
     if (user == null)
       return res.status(401).json({ message: "Invalid credentials" });
     const result: boolean = await bcrypt.compare(
@@ -52,7 +61,7 @@ router.post("/login", async (req, res) => {
     );
     if (!result)
       return res.status(401).json({ message: "Invalid credentials" });
-    const loggedInUser = await user.save();
+    const loggedInUser: UserDocument = await user.save();
     res.json({
       ...loggedInUser.toObject(),
       token: getToken(loggedInUser.email, loggedInUser.id),
@@ -63,39 +72,52 @@ router.post("/login", async (req, res) => {
 });
 
 //Get User
-router.get("/:id", authentication, getUser, (req, res) => {
-  res.json(res.user);
+router.get("/:id", authentication, getUser, (req: Request, res: Response) => {
+  const response = res as UserResponse;
+  response.json(response.user);
 });
 
 //Delete User
-router.get("/delete/:id", authentication, getUser, async (req, res) => {
-  try {
-    await res.user.remove();
-    res.json({ message: "User deleted" });
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+router.get(
+  "/delete/:id",
+  authentication,
+  getUser,
+  async (req: Request, res: Response) => {
+    const response = res as UserResponse;
+    try {
+      await response.user?.remove();
+      response.json({ message: "User deleted" });
+    } catch (error: any) {
+      response.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 //Update User
-router.post("/update/:id", authentication, getUser, async (req, res) => {
-  if (req.body.name != null) {
-    res.user.name = req.body.name;
+router.post(
+  "/update/:id",
+  authentication,
+  getUser,
+  async (req: Request, res: Response) => {
+    const response = res as UserResponse;
+    if (req.body.name != null) {
+      response.user.name = req.body.name;
+    }
+    if (req.body.email != null) {
+      response.user.email = req.body.email;
+    }
+    response.user.updatedAt = Date.now();
+    try {
+      const updatedUser = await response.user.save();
+      response.json(updatedUser);
+    } catch (error: any) {
+      response.status(400).json({ message: error.message });
+    }
   }
-  if (req.body.email != null) {
-    res.user.email = req.body.email;
-  }
-  res.user.updatedAt = Date.now();
-  try {
-    const updatedUser = await res.user.save();
-    res.json(updatedUser);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-});
+);
 
 //Follow User
-router.post("/follow", authentication, async (req, res) => {
+router.post("/follow", authentication, async (req: Request, res: Response) => {
   try {
     const user = await User.findById(req.body.userID);
     if (user === null)
@@ -113,32 +135,37 @@ router.post("/follow", authentication, async (req, res) => {
 });
 
 //Unfollow User
-router.post("/unfollow", authentication, async (req, res) => {
-  try {
-    const user = await User.findById(req.body.userID);
-    if (user === null)
-      return res.status(404).json({ message: "Cannot find user" });
-    const followingList = user.followingList.filter(
-      (id: ObjectId) => id !== req.body.followerID
-    );
-    user.followingList = followingList;
-    res.json(await user.save());
-  } catch (error: any) {
-    return res.status(500).json({ message: error.message });
+router.post(
+  "/unfollow",
+  authentication,
+  async (req: Request, res: Response) => {
+    try {
+      const user = await User.findById(req.body.userID);
+      if (user === null)
+        return res.status(404).json({ message: "Cannot find user" });
+      const followingList = user.followingList.filter(
+        (id: ObjectId) => id !== req.body.followerID
+      );
+      user.followingList = followingList;
+      res.json(await user.save());
+    } catch (error: any) {
+      return res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 //Middleware to get the user from ID
 async function getUser(req: Request, res: Response, next: NextFunction) {
-  let user;
+  const response = res as UserResponse;
+  let user: UserDocument;
   try {
     user = await User.findById(req.params.id);
     if (user === null)
-      return res.status(404).json({ message: "Cannot find user" });
+      return response.status(404).json({ message: "Cannot find user" });
   } catch (error: any) {
-    return res.status(500).json({ message: error.message });
+    return response.status(500).json({ message: error.message });
   }
-  res.user = user;
+  response.user = user;
   next();
 }
 
