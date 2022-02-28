@@ -7,7 +7,9 @@ import { UserResponse } from "../interfaces/Response";
 // const User = require("../models/user");
 import User from "../models/user";
 import { UserDocument, UserInterface } from "../interfaces/User";
+import { object } from "./middleware/validators/validatorSchemas";
 const authentication = require("./middleware/authentication");
+const validator = require("./middleware/validation");
 
 const router = Router();
 
@@ -22,50 +24,58 @@ router.get("/", async (req: Request, res: Response) => {
 });
 
 //Create user
-router.post("/signup", async (req: Request, res: Response) => {
-  try {
-    const payload: UserInterface = req.body;
-    const existingUser = await User.findOne({
-      email: payload.email,
-    });
-    if (existingUser != null)
-      return res.status(400).json({ message: "User already exists" });
-    const hash: string = await bcrypt.hash(payload.password, 10);
-    const user: UserDocument = new User({
-      name: payload.name,
-      email: payload.email,
-      password: hash,
-      DOB: payload.DOB,
-      gender: payload.gender,
-    });
-    const newUser: UserDocument = await user.save();
-    res.json(newUser.toObject());
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+router.post(
+  "/signup",
+  validator(object.signup),
+  async (req: Request, res: Response) => {
+    try {
+      const payload: UserInterface = req.body;
+      const existingUser = await User.findOne({
+        email: payload.email,
+      });
+      if (existingUser != null)
+        return res.status(400).json({ message: "User already exists" });
+      const hash: string = await bcrypt.hash(payload.password, 10);
+      const user: UserDocument = new User({
+        name: payload.name,
+        email: payload.email,
+        password: hash,
+        DOB: payload.DOB,
+        gender: payload.gender,
+      });
+      const newUser: UserDocument = await user.save();
+      res.json(newUser.toObject());
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
   }
-});
+);
 
 //Get User
-router.post("/login", async (req: Request, res: Response) => {
-  try {
-    const user = await User.findOne({ email: req.body.email });
-    if (user == null)
-      return res.status(401).json({ message: "Invalid credentials" });
-    const result: boolean = await bcrypt.compare(
-      req.body.password,
-      user.password
-    );
-    if (!result)
-      return res.status(401).json({ message: "Invalid credentials" });
-    const loggedInUser: UserDocument = await user.save();
-    res.json({
-      ...loggedInUser.toObject(),
-      token: getToken(loggedInUser.email, loggedInUser.id),
-    });
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+router.post(
+  "/login",
+  validator(object.login),
+  async (req: Request, res: Response) => {
+    try {
+      const user = await User.findOne({ email: req.body.email });
+      if (user == null)
+        return res.status(401).json({ message: "Invalid credentials" });
+      const result: boolean = await bcrypt.compare(
+        req.body.password,
+        user.password
+      );
+      if (!result)
+        return res.status(401).json({ message: "Invalid credentials" });
+      const loggedInUser: UserDocument = await user.save();
+      res.json({
+        ...loggedInUser.toObject(),
+        token: getToken(loggedInUser.email, loggedInUser.id),
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
   }
-});
+);
 
 //Get User
 router.get("/:id", authentication, getUser, (req: Request, res: Response) => {
@@ -90,8 +100,9 @@ router.get(
 );
 
 //Update User
-router.post(
+router.put(
   "/update/:id",
+  validator(object.user.updateSchema),
   authentication,
   getUser,
   async (req: Request, res: Response) => {
@@ -113,26 +124,32 @@ router.post(
 );
 
 //Follow User
-router.post("/follow", authentication, async (req: Request, res: Response) => {
-  try {
-    const user = await User.findById(req.body.userID);
-    if (user === null)
-      return res.status(404).json({ message: "Cannot find user" });
-    if (
-      user.followingList.length &&
-      user.followingList.includes(req.body.followerID)
-    )
-      return res.status(400).json({ message: "Already a follower" });
-    user.followingList.push(req.body.followerID);
-    res.json(await user.save());
-  } catch (error: any) {
-    return res.status(500).json({ message: error.message });
+router.post(
+  "/follow",
+  validator(object.user.followUser),
+  authentication,
+  async (req: Request, res: Response) => {
+    try {
+      const user = await User.findById(req.body.userID);
+      if (user === null)
+        return res.status(404).json({ message: "Cannot find user" });
+      if (
+        user.followingList.length &&
+        user.followingList.includes(req.body.followerID)
+      )
+        return res.status(400).json({ message: "Already a follower" });
+      user.followingList.push(req.body.followerID);
+      res.json(await user.save());
+    } catch (error: any) {
+      return res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 //Unfollow User
 router.post(
   "/unfollow",
+  validator(object.user.followUser),
   authentication,
   async (req: Request, res: Response) => {
     try {
