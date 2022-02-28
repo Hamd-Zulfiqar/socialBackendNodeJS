@@ -3,45 +3,62 @@ require("dotenv").config();
 import * as express from "express";
 import { Socket } from "socket.io";
 import * as morgan from "morgan";
-const app = express.default();
 const mongoose = require("mongoose");
-const server = require("http").createServer(app);
-const io = require("socket.io")(server);
 
-app.use(express.json());
-app.use(morgan.default("tiny"));
-server.listen(3000, () => {
-  console.log("server started....");
-});
+export default function createServer() {
+  const app = express.default();
+  const server = require("http").createServer(app);
+  const io = require("socket.io")(server);
 
-//Setting basic html for socket connection
-app.set("view engine", "ejs");
-app.set("socketIO", io);
+  app.use(express.json());
+  app.use(morgan.default("tiny"));
+  if (!module.parent) {
+    server.listen(3000, () => {
+      console.log("server started....");
+    });
+  }
 
-//Setting up feed write just to see live events log
-app.get("/feed", (req, res) => {
-  res.render("feed");
-});
+  //Setting basic html for socket connection
+  app.set("view engine", "ejs");
+  app.set("socketIO", io);
 
-//Setting user routes
-const usersRoutes = require("./routes/users");
-app.use("/users", usersRoutes);
+  //ping test
+  app.get("/ping", (req, res) => {
+    res.status(200).json({
+      success: true,
+      message: "Ping successful!",
+    });
+  });
 
-//Setting user routes
-const postsRoutes = require("./routes/posts");
-app.use("/posts", postsRoutes);
+  //Setting up feed write just to see live events log
+  app.get("/feed", (req, res) => {
+    res.render("../dist/views/feed.ejs");
+  });
 
-mongoose.connect(process.env.DB_URL!, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+  //Setting user routes
+  const usersRoutes = require("./routes/users");
+  app.use("/users", usersRoutes);
 
-//connecting to db
-const db = mongoose.connection;
-db.on("error", (error: Error) => console.error(error));
-db.once("open", () => console.log("Connected to db successfully"));
+  //Setting user routes
+  const postsRoutes = require("./routes/posts");
+  app.use("/posts", postsRoutes);
 
-// setting up sockets
-io.on("connection", (socket: Socket) => {
-  console.log("A user is connected with socket id:", socket.id);
-});
+  mongoose.connect(process.env.DB_URL!, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+
+  //connecting to db
+  const db = mongoose.connection;
+  db.on("error", (error: Error) => console.error(error));
+  db.once("open", () => console.log("Connected to db successfully"));
+
+  // setting up sockets
+  io.on("connection", (socket: Socket) => {
+    console.log("A user is connected with socket id:", socket.id);
+  });
+
+  return app;
+}
+
+createServer();

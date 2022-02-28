@@ -12,5 +12,5 @@ export interface UserResponse extends AuthResponse {
 }
 
 export interface PostResponse extends AuthResponse {
-  post?: PostInterface;
+  post: PostInterface;
 }

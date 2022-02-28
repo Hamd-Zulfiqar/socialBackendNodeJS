@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { PostInterface } from "../interfaces/Post";
-const Post = require("../models/post");
+import { PostResponse } from "../interfaces/Response";
+//const Post = require("../models/post");
+import Post from "../models/post";
 const User = require("../models/user");
 const authentication = require("./middleware/authentication");
 const router = Router();
@@ -18,7 +20,7 @@ router.get("/", async (req: Request, res: Response) => {
 //Get all posts for a user
 router.get("/user", authentication, async (req, res) => {
   try {
-    const posts = await Post.find({ userID: req.query.id });
+    const posts: PostInterface[] = await Post.find({ userID: req.query.id });
     res.json(posts);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -39,8 +41,8 @@ router.get("/feed", authentication, async (req: Request, res: Response) => {
       .skip(((page as number) - 1) * limit)
       .limit(limit);
     if (req.query.filter)
-      posts = posts.filter((post: any) =>
-        post.caption.includes(req.query.filter)
+      posts = posts.filter((post: PostInterface) =>
+        post.caption.includes(req.query.filter as string)
       );
     res.json(posts);
   } catch (error: any) {
@@ -49,7 +51,7 @@ router.get("/feed", authentication, async (req: Request, res: Response) => {
 });
 
 //Create post
-router.post("/create", authentication, async (req, res) => {
+router.post("/create", authentication, async (req: Request, res: Response) => {
   const post = new Post({
     userID: req.body.userID,
     caption: req.body.caption,
@@ -68,46 +70,60 @@ router.post("/create", authentication, async (req, res) => {
 });
 
 //Get post
-router.get("/:id", authentication, getPost, (req, res) => {
-  res.json(res.post);
+router.get("/:id", authentication, getPost, (req: Request, res: Response) => {
+  const response = res as PostResponse;
+  res.json(response.post);
 });
 
 //Delete post
-router.get("/delete/:id", authentication, getPost, async (req, res) => {
-  try {
-    await res.post.remove();
-    res.json({ message: "Post deleted" });
-  } catch (error: any) {
-    res.status(500).json({ message: error.message });
+router.get(
+  "/delete/:id",
+  authentication,
+  getPost,
+  async (req: Request, res: Response) => {
+    const response = res as PostResponse;
+    try {
+      await response.post.remove();
+      res.json({ message: "Post deleted" });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 //Update Post
-router.post("/update/:id", authentication, getPost, async (req, res) => {
-  if (req.body.caption != null) {
-    res.post.caption = req.body.caption;
+router.post(
+  "/update/:id",
+  authentication,
+  getPost,
+  async (req: Request, res: Response) => {
+    const response = res as PostResponse;
+    if (req.body.caption != null) {
+      response.post.caption = req.body.caption;
+    }
+    response.post.updatedAt = Date.now();
+    try {
+      const updatedPost = await response.post.save();
+      res.json(updatedPost);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
   }
-  res.post.updatedAt = Date.now();
-  try {
-    const updatedPost = await res.post.save();
-    res.json(updatedPost);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
-  }
-});
+);
 
 //Middleware to get the post from ID
 async function getPost(req: Request, res: Response, next: NextFunction) {
+  const response = res as PostResponse;
   let post;
   try {
     post = await Post.findById(req.params.id);
     if (post === null) {
-      return res.status(404).json({ message: "Cannot find post" });
+      return response.status(404).json({ message: "Cannot find post" });
     }
   } catch (error: any) {
-    return res.status(500).json({ message: error.message });
+    return response.status(500).json({ message: error.message });
   }
-  res.post = post;
+  response.post = post;
   next();
 }
 

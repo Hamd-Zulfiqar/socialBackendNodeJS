@@ -5,7 +5,7 @@ export interface UserInterface {
   password: string;
   DOB: Date;
   gender: boolean;
-  followingList?: String[];
+  followingList: String[];
   createdAt?: number;
   updatedAt?: number;
 }
