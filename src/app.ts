@@ -3,9 +3,9 @@ require("dotenv").config();
 import * as express from "express";
 import { Socket } from "socket.io";
 import * as morgan from "morgan";
-const mongoose = require("mongoose");
+import connectDB from "./database";
 
-export default function createServer() {
+export default async function createServer() {
   const app = express.default();
   const server = require("http").createServer(app);
   const io = require("socket.io")(server);
@@ -35,6 +35,8 @@ export default function createServer() {
     res.render("../dist/views/feed.ejs");
   });
 
+  await connectDB();
+
   //Setting user routes
   const usersRoutes = require("./routes/users");
   app.use("/users", usersRoutes);
@@ -42,16 +44,6 @@ export default function createServer() {
   //Setting user routes
   const postsRoutes = require("./routes/posts");
   app.use("/posts", postsRoutes);
-
-  mongoose.connect(process.env.DB_URL!, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-
-  //connecting to db
-  const db = mongoose.connection;
-  db.on("error", (error: Error) => console.error(error));
-  db.once("open", () => console.log("Connected to db successfully"));
 
   // setting up sockets
   io.on("connection", (socket: Socket) => {
