@@ -1,14 +1,13 @@
 import { expect } from "chai";
 import { Application } from "express";
 import request from "supertest";
-import createServer from "../src/app";
+import startServer from "../src/app";
 
-const app = createServer();
+let app: Application;
 
 describe("Main File Tests", () => {
-  before(() => {});
-  it("server is running successfully!", async () => {
-    console.log("LOL", app);
+  before(async () => {
+    app = await startServer();
   });
 
   it("ping test", async () => {

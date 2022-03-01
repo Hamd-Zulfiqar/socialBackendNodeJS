@@ -84,7 +84,7 @@ router.get("/:id", authentication, getUser, (req: Request, res: Response) => {
 });
 
 //Delete User
-router.get(
+router.delete(
   "/delete/:id",
   authentication,
   getUser,

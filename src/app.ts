@@ -5,7 +5,7 @@ import { Socket } from "socket.io";
 import * as morgan from "morgan";
 import connectDB from "./database";
 
-export default async function createServer() {
+export default async function startServer() {
   const app = express.default();
   const server = require("http").createServer(app);
   const io = require("socket.io")(server);
@@ -53,4 +53,4 @@ export default async function createServer() {
   return app;
 }
 
-createServer();
+startServer();

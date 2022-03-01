@@ -7,4 +7,5 @@ export const updateSchema = Joi.object().keys({
 
 export const followUser = Joi.object().keys({
   userID: Joi.string().required(),
+  followerID: Joi.string().required(),
 });
