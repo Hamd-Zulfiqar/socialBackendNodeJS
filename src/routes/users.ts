@@ -2,7 +2,6 @@ let jwt = require("jsonwebtoken");
 // const bcrypt = require("bcrypt");
 import bcrypt from "bcrypt";
 import { Router, Request, Response, NextFunction } from "express";
-import { ObjectId } from "mongoose";
 import { UserResponse } from "../interfaces/Response";
 // const User = require("../models/user");
 import User from "../models/user";

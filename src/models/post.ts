@@ -1,9 +1,9 @@
-import { Schema, model, Document } from "mongoose";
-import { PostInterface } from "../interfaces/Post";
+import { Schema, model, Types } from "mongoose";
+import { PostDocument } from "../interfaces/Post";
 
-const postSchema = new Schema<PostInterface & Document>({
+const postSchema = new Schema<PostDocument>({
   userID: {
-    type: String,
+    type: Types.ObjectId,
     required: true,
   },
   caption: {
@@ -25,4 +25,4 @@ const postSchema = new Schema<PostInterface & Document>({
   },
 });
 
-export default model("Post", postSchema);
+export default model<PostDocument>("Post", postSchema);

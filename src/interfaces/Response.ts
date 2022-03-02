@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { UserDocument, UserInterface } from "./User";
-import { PostInterface } from "./Post";
+import { UserDocument } from "./User";
+import { PostDocument } from "./Post";
 import { JwtPayload } from "jsonwebtoken";
 
 export interface AuthResponse extends Response {
@@ -12,5 +12,5 @@ export interface UserResponse extends AuthResponse {
 }
 
 export interface PostResponse extends AuthResponse {
-  post: PostInterface;
+  post: PostDocument;
 }

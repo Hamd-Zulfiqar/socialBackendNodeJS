@@ -1,7 +1,8 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { PostInterface } from "../interfaces/Post";
+import { Types } from "mongoose";
+import { PostDocument } from "../interfaces/Post";
+import { Query } from "interfaces/Query";
 import { PostResponse } from "../interfaces/Response";
-//const Post = require("../models/post");
 import Post from "../models/post";
 const User = require("../models/user");
 const authentication = require("./middleware/authentication");
@@ -10,7 +11,7 @@ const router = Router();
 //Get all posts
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const posts: PostInterface[] = await Post.find();
+    const posts: PostDocument[] = await Post.find();
     res.json(posts);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -20,7 +21,8 @@ router.get("/", async (req: Request, res: Response) => {
 //Get all posts for a user
 router.get("/user", authentication, async (req, res) => {
   try {
-    const posts: PostInterface[] = await Post.find({ userID: req.query.id });
+    const userID: String = req.query.id as String;
+    const posts: PostDocument[] = await Post.find({ userID });
     res.json(posts);
   } catch (error: any) {
     res.status(500).json({ message: error.message });
@@ -41,7 +43,7 @@ router.get("/feed", authentication, async (req: Request, res: Response) => {
       .skip(((page as number) - 1) * limit)
       .limit(limit);
     if (req.query.filter)
-      posts = posts.filter((post: PostInterface) =>
+      posts = posts.filter((post: PostDocument) =>
         post.caption.includes(req.query.filter as string)
       );
     res.json(posts);

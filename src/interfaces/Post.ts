@@ -1,6 +1,6 @@
 import { Document } from "mongoose";
 
-export interface PostInterface extends Document {
+export interface PostInterface {
   userID: String;
   caption: String;
   image: Buffer;
