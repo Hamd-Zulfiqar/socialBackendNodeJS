@@ -2,8 +2,6 @@ import { expect } from "chai";
 import { Application } from "express";
 import request from "supertest";
 import startServer from "../../src/app";
-import sinon from "sinon";
-import User from "../../src/models/user";
 
 let app: Application;
 let user: any;
@@ -14,7 +12,7 @@ describe("User Controller Tests", () => {
     app = await startServer();
     const login = await request(app)
       .post("/users/login")
-      .send({ email: "hamd4@social.com", password: "hamd" });
+      .send({ email: "hamd@social.com", password: "hamd" });
 
     user = login.body;
   });
@@ -31,8 +29,8 @@ describe("User Controller Tests", () => {
   it("login test", async () => {
     const response = await request(app)
       .post("/users/login")
-      .send({ email: "hamd4@social.com", password: "hamd" });
-    expect(response.body.name).to.equal("Hamd4");
+      .send({ email: "hamd@social.com", password: "hamd" });
+    expect(response.body.name).to.equal("Hamd");
   });
 
   it("signUp test", async () => {
@@ -51,15 +49,15 @@ describe("User Controller Tests", () => {
     const response = await request(app)
       .get("/users/" + user._id)
       .set("Authorization", "Bearer " + user.token);
-    expect(response.body.name).to.equal("Hamd4");
+    expect(response.body.name).to.equal("Hamd");
   });
 
   it("update user test", async () => {
     const response = await request(app)
       .put("/users/update/" + user._id)
       .set("Authorization", "Bearer " + user.token)
-      .send({ name: "Hamd4", email: "hamd4@social.com" });
-    expect(response.body.name).to.equal("Hamd4");
+      .send({ name: "Hamd", email: "hamd@social.com" });
+    expect(response.body.name).to.equal("Hamd");
   });
 
   it("follow user test", async () => {
@@ -67,7 +65,7 @@ describe("User Controller Tests", () => {
       .post("/users/follow")
       .set("Authorization", "Bearer " + user.token)
       .send({ userID: user._id, followerID: newUser._id });
-    expect(response.body.name).to.equal("Hamd4");
+    expect(response.body.name).to.equal("Hamd");
   });
 
   it("un-follow user test", async () => {
@@ -75,7 +73,7 @@ describe("User Controller Tests", () => {
       .post("/users/unfollow")
       .set("Authorization", "Bearer " + user.token)
       .send({ userID: user._id, followerID: newUser._id });
-    expect(response.body.name).to.equal("Hamd4");
+    expect(response.body.name).to.equal("Hamd");
   });
 
   it("delete user test", async () => {

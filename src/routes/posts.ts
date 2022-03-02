@@ -86,7 +86,7 @@ router.get("/:id", authentication, getPost, (req: Request, res: Response) => {
 });
 
 //Delete post
-router.get(
+router.delete(
   "/delete/:id",
   authentication,
   getPost,
