@@ -5,7 +5,8 @@ import { PostResponse } from "../interfaces/Response";
 import Post from "../models/post";
 const validator = require("./middleware/validation");
 import { object } from "./middleware/validators/validatorSchemas";
-const User = require("../models/user");
+// const User = require("../models/user");
+import User from "../models/user";
 const authentication = require("./middleware/authentication");
 const router = Router();
 
@@ -63,6 +64,7 @@ router.post(
       userID: req.body.userID,
       caption: req.body.caption,
     });
+    console.log("POST: ", post);
     try {
       const user = await User.findById(req.body.userID);
       if (user === null)
