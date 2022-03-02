@@ -1,9 +1,10 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { Types } from "mongoose";
 import { PostDocument } from "../interfaces/Post";
-import { Query } from "interfaces/Query";
 import { PostResponse } from "../interfaces/Response";
 import Post from "../models/post";
+const validator = require("./middleware/validation");
+import { object } from "./middleware/validators/validatorSchemas";
 const User = require("../models/user");
 const authentication = require("./middleware/authentication");
 const router = Router();
@@ -53,23 +54,28 @@ router.get("/feed", authentication, async (req: Request, res: Response) => {
 });
 
 //Create post
-router.post("/create", authentication, async (req: Request, res: Response) => {
-  const post = new Post({
-    userID: req.body.userID,
-    caption: req.body.caption,
-  });
-  try {
-    const user = await User.findById(req.body.userID);
-    if (user === null)
-      return res.status(404).json({ message: "Cannot find user" });
-    const newPost = await post.save();
-    const io = req.app.get("socketIO");
-    io.emit("postAdded", newPost.toObject());
-    res.json(newPost);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+router.post(
+  "/create",
+  validator(object.post.createPost),
+  authentication,
+  async (req: Request, res: Response) => {
+    const post = new Post({
+      userID: req.body.userID,
+      caption: req.body.caption,
+    });
+    try {
+      const user = await User.findById(req.body.userID);
+      if (user === null)
+        return res.status(404).json({ message: "Cannot find user" });
+      const newPost = await post.save();
+      const io = req.app.get("socketIO");
+      io.emit("postAdded", newPost.toObject());
+      res.json(newPost);
+    } catch (error: any) {
+      res.status(400).json({ message: error.message });
+    }
   }
-});
+);
 
 //Get post
 router.get("/:id", authentication, getPost, (req: Request, res: Response) => {
@@ -96,6 +102,7 @@ router.get(
 //Update Post
 router.post(
   "/update/:id",
+  validator(object.post.updatePost),
   authentication,
   getPost,
   async (req: Request, res: Response) => {
