@@ -1,4 +1,4 @@
-//import * as dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import * as express from "express";
 import { Socket } from "socket.io";
 import * as morgan from "morgan";
@@ -7,7 +7,7 @@ import { connect } from "mongoose";
 import usersRoutes from "./routes/users";
 import postsRoutes from "./routes/posts";
 
-//dotenv.config();
+dotenv.config();
 
 connect(process.env.DB_URL! as string, {
   useNewUrlParser: true,

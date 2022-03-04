@@ -25,30 +25,70 @@ describe("User Controller Tests", () => {
     });
   });
 
-  it("login test", async () => {
-    const response = await request(app)
-      .post("/users/login")
-      .send({ email: "hamd@social.com", password: "hamd" });
-    expect(response.body.name).to.equal("Hamd");
-  });
-
-  it("signUp test", async () => {
-    const response = await request(app).post("/users/signup").send({
-      email: "hassan4@social.com",
-      password: "hassan",
-      name: "Hassan",
-      DOB: "08/09/1997",
-      gender: true,
+  describe("Login test", () => {
+    it("Validation Middleware failed", async () => {
+      const response = await request(app)
+        .post("/users/login")
+        .send({ email: "hamd@social.com" });
+      expect(response.body.message).to.equal("API Body validation Failed");
     });
-    newUser = response.body;
-    expect(response.body.name).to.equal("Hassan");
+    it("User not found", async () => {
+      const response = await request(app)
+        .post("/users/login")
+        .send({ email: "ham@social.com", password: "lol" });
+      expect(response.body.message).to.equal("Invalid credentials");
+    });
+    it("Invalid Credentials", async () => {
+      const response = await request(app)
+        .post("/users/login")
+        .send({ email: "hamd@social.com", password: "lol" });
+      expect(response.body.message).to.equal("Invalid credentials");
+    });
+    it("Success", async () => {
+      const response = await request(app)
+        .post("/users/login")
+        .send({ email: "hamd@social.com", password: "hamd" });
+      expect(response.body.name).to.equal("Hamd");
+    });
   });
 
-  it("get by ID test", async () => {
-    const response = await request(app)
-      .get("/users/" + user._id)
-      .set("Authorization", "Bearer " + user.token);
-    expect(response.body.name).to.equal("Hamd");
+  describe("Sign up test", () => {
+    it("user already exists", async () => {
+      const response = await request(app).post("/users/signup").send({
+        email: "hamd@social.com",
+        password: "hassan",
+        name: "Hassan",
+        DOB: "08/09/1997",
+        gender: true,
+      });
+      expect(response.body.message).to.equal("User already exists");
+    });
+    it("success", async () => {
+      const response = await request(app).post("/users/signup").send({
+        email: "hassan4@social.com",
+        password: "hassan",
+        name: "Hassan",
+        DOB: "08/09/1997",
+        gender: true,
+      });
+      newUser = response.body;
+      expect(response.body.name).to.equal("Hassan");
+    });
+  });
+
+  describe("Get by ID test", () => {
+    it("Authentication failed!", async () => {
+      const response = await request(app)
+        .get("/users/" + user._id)
+        .set("Authorize", "Bearer " + user.token);
+      expect(response.body.message).to.equal("Authentication Failed");
+    });
+    it("Success", async () => {
+      const response = await request(app)
+        .get("/users/" + user._id)
+        .set("Authorization", "Bearer " + user.token);
+      expect(response.body.name).to.equal("Hamd");
+    });
   });
 
   it("update user test", async () => {
@@ -59,26 +99,46 @@ describe("User Controller Tests", () => {
     expect(response.body.name).to.equal("Hamd");
   });
 
-  it("follow user test", async () => {
-    const response = await request(app)
-      .post("/users/follow")
-      .set("Authorization", "Bearer " + user.token)
-      .send({ userID: user._id, followerID: newUser._id });
-    expect(response.body.name).to.equal("Hamd");
+  describe("follow user test", () => {
+    it("user does not exist", async () => {
+      const response = await request(app)
+        .post("/users/follow")
+        .set("Authorization", "Bearer " + user.token)
+        .send({ userID: "56cb91bdc3464f14678934ca", followerID: newUser._id });
+      expect(response.body.message).to.equal("Cannot find user");
+    });
+    it("success", async () => {
+      const response = await request(app)
+        .post("/users/follow")
+        .set("Authorization", "Bearer " + user.token)
+        .send({ userID: user._id, followerID: newUser._id });
+      expect(response.body.name).to.equal("Hamd");
+    });
+    it("already followed", async () => {
+      const response = await request(app)
+        .post("/users/follow")
+        .set("Authorization", "Bearer " + user.token)
+        .send({ userID: user._id, followerID: newUser._id });
+      expect(response.body.message).to.equal("Already a follower");
+    });
   });
 
-  it("un-follow user test", async () => {
-    const response = await request(app)
-      .post("/users/unfollow")
-      .set("Authorization", "Bearer " + user.token)
-      .send({ userID: user._id, followerID: newUser._id });
-    expect(response.body.name).to.equal("Hamd");
+  describe("un-follow user test", () => {
+    it("success", async () => {
+      const response = await request(app)
+        .post("/users/unfollow")
+        .set("Authorization", "Bearer " + user.token)
+        .send({ userID: user._id, followerID: newUser._id });
+      expect(response.body.name).to.equal("Hamd");
+    });
   });
 
-  it("delete user test", async () => {
-    const response = await request(app)
-      .delete("/users/delete/" + newUser._id)
-      .set("Authorization", "Bearer " + user.token);
-    expect(response.body.message).to.equal("User deleted");
+  describe("delete user test", () => {
+    it("success", async () => {
+      const response = await request(app)
+        .delete("/users/delete/" + newUser._id)
+        .set("Authorization", "Bearer " + user.token);
+      expect(response.body.message).to.equal("User deleted");
+    });
   });
 });
