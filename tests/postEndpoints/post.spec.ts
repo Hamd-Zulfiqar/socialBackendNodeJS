@@ -24,6 +24,12 @@ describe("Post Controller Tests", () => {
   });
 
   describe("Fetch all posts for a user", () => {
+    it("Authentication failed", async () => {
+      const response = await request(app)
+        .get("/posts/user?id=" + user._id)
+        .set("Authorize", "Bearer " + user.token);
+      expect(response.body.message).to.equal("Authentication Failed");
+    });
     it("Success", async () => {
       const response = await request(app)
         .get("/posts/user?id=" + user._id)
@@ -33,6 +39,12 @@ describe("Post Controller Tests", () => {
   });
 
   describe("Get feed for a user", () => {
+    it("User not found", async () => {
+      const response = await request(app)
+        .get("/posts/feed?id=56cb91bdc3464f14678934ca")
+        .set("Authorization", "Bearer " + user.token);
+      expect(response.body.message).to.equal("User not found");
+    });
     it("Success", async () => {
       const response = await request(app)
         .get("/posts/feed?id=" + user._id)
@@ -42,6 +54,16 @@ describe("Post Controller Tests", () => {
   });
 
   describe("Create post for a user", () => {
+    it("User not found", async () => {
+      const response = await request(app)
+        .post("/posts/create")
+        .set("Authorization", "Bearer " + user.token)
+        .send({
+          userID: "56cb91bdc3464f14678934ca",
+          caption: "TEST!",
+        });
+      expect(response.body.message).to.equal("Cannot find user");
+    });
     it("Success", async () => {
       const response = await request(app)
         .post("/posts/create")
@@ -68,6 +90,13 @@ describe("Post Controller Tests", () => {
   });
 
   describe("Update post by ID", () => {
+    it("Post not found!", async () => {
+      const response = await request(app)
+        .post("/posts/update/56cb91bdc3464f14678934ca")
+        .set("Authorization", "Bearer " + user.token)
+        .send({ caption: "Message Updated!" });
+      expect(response.body.message).to.equal("Cannot find post");
+    });
     it("Success", async () => {
       const post = await request(app)
         .get("/posts/user?id=" + user._id)
