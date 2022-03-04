@@ -1,15 +1,11 @@
-let jwt = require("jsonwebtoken");
-// const bcrypt = require("bcrypt");
+import { sign } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { Router, Request, Response, NextFunction } from "express";
 import { UserResponse } from "../interfaces/Response";
-// const User = require("../models/user");
 import User from "../models/user";
 import { UserDocument, UserInterface } from "../interfaces/User";
 import { object } from "./middleware/validators/validatorSchemas";
-// const authentication = require("./middleware/authentication");
 import { authentication } from "./middleware/authentication";
-// const validator = require("./middleware/validation");
 import { validator } from "./middleware/validation";
 
 const router = Router();
@@ -31,7 +27,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const payload: UserInterface = req.body;
-      const existingUser = await User.findOne({
+      const existingUser: UserDocument | null = await User.findOne({
         email: payload.email,
       });
       if (existingUser != null)
@@ -92,7 +88,7 @@ router.delete(
   async (req: Request, res: Response) => {
     const response = res as UserResponse;
     try {
-      await response.user?.remove();
+      await response.user.remove();
       response.json({ message: "User deleted" });
     } catch (error: any) {
       response.status(500).json({ message: error.message });
@@ -184,7 +180,7 @@ async function getUser(req: Request, res: Response, next: NextFunction) {
 }
 
 function getToken(email: string, id: string) {
-  const token = jwt.sign({ email, id }, process.env.JWT_TOKEN_SECRET, {
+  const token = sign({ email, id }, process.env.JWT_TOKEN_SECRET!, {
     expiresIn: "2d",
   });
   return token;

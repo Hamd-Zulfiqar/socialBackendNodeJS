@@ -21,11 +21,11 @@ const io = require("socket.io")(server);
 app.use(express.json());
 app.use(morgan.default("tiny"));
 app.use(cors.default());
-if (!module.parent) {
-  server.listen(3000, () => {
-    console.log("server started....");
-  });
-}
+// if (!module.parent) {
+//   server.listen(3000, () => {
+//     console.log("server started....");
+//   });
+// }
 
 //Setting basic html for socket connection
 app.set("view engine", "ejs");

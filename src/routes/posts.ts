@@ -1,5 +1,4 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { Types } from "mongoose";
 import { PostDocument } from "../interfaces/Post";
 import { PostResponse } from "../interfaces/Response";
 import Post from "../models/post";
@@ -7,6 +6,7 @@ import { object } from "./middleware/validators/validatorSchemas";
 import User from "../models/user";
 import { authentication } from "./middleware/authentication";
 import { validator } from "./middleware/validation";
+
 const router = Router();
 
 //Get all posts
@@ -63,7 +63,6 @@ router.post(
       userID: req.body.userID,
       caption: req.body.caption,
     });
-    console.log("POST: ", post);
     try {
       const user = await User.findById(req.body.userID);
       if (user === null)

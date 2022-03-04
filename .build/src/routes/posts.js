@@ -58,7 +58,6 @@ router.post("/create", (0, validation_1.validator)(validatorSchemas_1.object.pos
         userID: req.body.userID,
         caption: req.body.caption,
     });
-    console.log("POST: ", post);
     try {
         const user = await user_1.default.findById(req.body.userID);
         if (user === null)

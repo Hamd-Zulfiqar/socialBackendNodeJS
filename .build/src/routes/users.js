@@ -3,16 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-let jwt = require("jsonwebtoken");
-// const bcrypt = require("bcrypt");
+const jsonwebtoken_1 = require("jsonwebtoken");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const express_1 = require("express");
-// const User = require("../models/user");
 const user_1 = __importDefault(require("../models/user"));
 const validatorSchemas_1 = require("./middleware/validators/validatorSchemas");
-// const authentication = require("./middleware/authentication");
 const authentication_1 = require("./middleware/authentication");
-// const validator = require("./middleware/validation");
 const validation_1 = require("./middleware/validation");
 const router = (0, express_1.Router)();
 //Get all users
@@ -72,10 +68,9 @@ router.get("/:id", authentication_1.authentication, getUser, (req, res) => {
 });
 //Delete User
 router.delete("/delete/:id", authentication_1.authentication, getUser, async (req, res) => {
-    var _a;
     const response = res;
     try {
-        await ((_a = response.user) === null || _a === void 0 ? void 0 : _a.remove());
+        await response.user.remove();
         response.json({ message: "User deleted" });
     }
     catch (error) {
@@ -146,7 +141,7 @@ async function getUser(req, res, next) {
     next();
 }
 function getToken(email, id) {
-    const token = jwt.sign({ email, id }, process.env.JWT_TOKEN_SECRET, {
+    const token = (0, jsonwebtoken_1.sign)({ email, id }, process.env.JWT_TOKEN_SECRET, {
         expiresIn: "2d",
     });
     return token;
