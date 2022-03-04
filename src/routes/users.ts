@@ -7,8 +7,10 @@ import { UserResponse } from "../interfaces/Response";
 import User from "../models/user";
 import { UserDocument, UserInterface } from "../interfaces/User";
 import { object } from "./middleware/validators/validatorSchemas";
-const authentication = require("./middleware/authentication");
-const validator = require("./middleware/validation");
+// const authentication = require("./middleware/authentication");
+import { authentication } from "./middleware/authentication";
+// const validator = require("./middleware/validation");
+import { validator } from "./middleware/validation";
 
 const router = Router();
 
@@ -188,4 +190,4 @@ function getToken(email: string, id: string) {
   return token;
 }
 
-module.exports = router;
+export default router;

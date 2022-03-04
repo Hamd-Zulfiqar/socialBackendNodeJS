@@ -3,11 +3,10 @@ import { Types } from "mongoose";
 import { PostDocument } from "../interfaces/Post";
 import { PostResponse } from "../interfaces/Response";
 import Post from "../models/post";
-const validator = require("./middleware/validation");
 import { object } from "./middleware/validators/validatorSchemas";
-// const User = require("../models/user");
 import User from "../models/user";
-const authentication = require("./middleware/authentication");
+import { authentication } from "./middleware/authentication";
+import { validator } from "./middleware/validation";
 const router = Router();
 
 //Get all posts
@@ -138,4 +137,4 @@ async function getPost(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
-module.exports = router;
+export default router;

@@ -1,15 +1,14 @@
 import { expect } from "chai";
-import { Application } from "express";
 import request from "supertest";
-import startServer from "../../src/app";
+import app from "../../src/app";
+import connectDB from "../../src/database";
 
-let app: Application;
 let user: any;
 let newUser: any;
 
 describe("User Controller Tests", () => {
   before(async () => {
-    app = await startServer();
+    await connectDB();
     const login = await request(app)
       .post("/users/login")
       .send({ email: "hamd@social.com", password: "hamd" });

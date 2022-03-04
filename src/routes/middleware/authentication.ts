@@ -2,7 +2,11 @@ import * as jwt from "jsonwebtoken";
 import { Request, NextFunction, Response } from "express";
 import { AuthResponse } from "../../interfaces/Response";
 
-module.exports = (req: Request, res: Response, next: NextFunction) => {
+export const authentication = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const response = res as AuthResponse;
   try {
     const token: string | undefined = req.headers.authorization?.split(" ")[1];

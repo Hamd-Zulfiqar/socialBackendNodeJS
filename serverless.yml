@@ -1,0 +1,27 @@
+service: social-network
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+
+functions:
+  app-api:
+    environment:
+      DB_URL: mongodb+srv://DBAdmin:social2022@cluster0.kh5nw.mongodb.net/socialApp
+      JWT_TOKEN_SECRET: "FAIRY TAIL!"
+    handler: handler.api
+    events:
+      - http:
+          path: /
+          method: get
+          cors: true
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
